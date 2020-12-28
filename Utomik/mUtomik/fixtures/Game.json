@@ -1,0 +1,46 @@
+[
+  {
+    "model": "mUtomik.Game",
+    "pk": 1,
+    "fields": {
+      "name": "My Game",
+      "size": "1024MB",
+      "description": "Interesting game",
+      "genre": "Fiction",
+      "publisher": "Omendra"
+    }
+  },
+  {
+    "model": "mUtomik.Game",
+    "pk": 2,
+    "fields": {
+      "name": "My Game 2",
+      "size": "1024MB",
+      "description": "Interesting game",
+      "genre": "Fiction",
+      "publisher": "Omendra"
+    }
+  },
+  {
+    "model": "mUtomik.Game",
+    "pk": 3,
+    "fields": {
+      "name": "My Game 3",
+      "size": "1024MB",
+      "description": "Interesting game",
+      "genre": "Action",
+      "publisher": "Omendra"
+    }
+  },
+  {
+    "model": "mUtomik.Game",
+    "pk": 4,
+    "fields": {
+      "name": "My Game 4",
+      "size": "1024MB",
+      "description": "Interesting game",
+      "genre": "Horror",
+      "publisher": "Omendra"
+    }
+  }
+]

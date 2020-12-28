@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 from .permissions import isStaff
@@ -12,9 +14,9 @@ from .serializer import RegisterSerializer, UserSerializer, GameSerializer, Play
 
 class CustomAPIView(APIView):
     def get_permissions(self):
-        # Instances and returns the dict of permissions that the view requires.
         return {
-            key: [permission() for permission in permissions] for key, permissions in self.permission_classes.items()}
+            key: [permission() for permission in permissions] for key, permissions in self.permission_classes.items()
+        }
 
     def check_permissions(self, request):
         method = request.method.lower()
@@ -25,7 +27,7 @@ class CustomAPIView(APIView):
 
 
 class UsersApi(CustomAPIView):
-    permission_classes = {'get': [AllowAny], 'post': [AllowAny]}
+    permission_classes = {'get': [isStaff], 'post': [AllowAny]}
     
     def post(self, request, format=None):
         serializer = RegisterSerializer(data = request.data)
@@ -70,10 +72,11 @@ class ApiPlaySession(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
-        serializer = PlaySessionSerializer(data = request.data)
+        serializer = PlaySessionSerializer(data = request.data, context = {"request": request})
 
         if serializer.is_valid():
             serializer.save()
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -86,3 +89,11 @@ class ListUsersLastPlayed(APIView):
         serializer = LastGamesPlayedSerializer(users, many = True)
 
         return Response(serializer.data)
+
+
+@receiver(post_save, sender=PlaySession)
+def update_user(sender, instance, **kwargs):
+    user = instance.created_by
+    game = instance.game
+    user.last_played = game
+    user.save()

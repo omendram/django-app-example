@@ -39,10 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'Utomik.user',
+    'Utomik.mUtomik',
 ]
 
-AUTH_USER_MODEL = 'user.User'
+AUTH_USER_MODEL = 'mUtomik.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
