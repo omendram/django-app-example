@@ -13,11 +13,14 @@ class Game(models.Model):
 class User(AbstractUser):
     birth_date = models.DateField(blank=False)    
     last_played = models.ForeignKey(Game, on_delete=models.CASCADE, null=True, blank=True)
-    REQUIRED_FIELDS = ['birth_date', 'password', 'email'] 
+    REQUIRED_FIELDS = ['birth_date', 'password', 'email']
 
 User = get_user_model()
 
 
 class PlaySession(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now=True)
+
+    REQUIRED_FIELDS = ['game']

@@ -1,14 +1,32 @@
-from rest_framework import permissions, mixins
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
+
+from .permissions import isStaff
 from .models import User, Game, PlaySession
-from .serializer import RegisterSerializer, UserSerializer, GameSerializer, PlaySessionSerializer
+from .serializer import RegisterSerializer, UserSerializer, GameSerializer, PlaySessionSerializer, LastGamesPlayedSerializer
 
 
-class UsersApi(APIView):
+class CustomAPIView(APIView):
+    def get_permissions(self):
+        # Instances and returns the dict of permissions that the view requires.
+        return {
+            key: [permission() for permission in permissions] for key, permissions in self.permission_classes.items()}
+
+    def check_permissions(self, request):
+        method = request.method.lower()
+
+        for permission in self.get_permissions()[method]:
+            if not permission.has_permission(request, self):
+                self.permission_denied(request, message=getattr(permission, 'message', None))
+
+
+class UsersApi(CustomAPIView):
+    permission_classes = {'get': [AllowAny], 'post': [AllowAny]}
+    
     def post(self, request, format=None):
         serializer = RegisterSerializer(data = request.data)
         
@@ -25,6 +43,8 @@ class UsersApi(APIView):
 
 
 class ListGames(APIView):
+    permission_classes = [AllowAny]
+
     def get(self, request, format=None):
         games = Game.objects.all()
         serializer = GameSerializer(games, many = True)
@@ -32,6 +52,8 @@ class ListGames(APIView):
 
 
 class FetchGame(APIView):
+    permission_classes = [AllowAny]
+
     def get_object(self, pk):
         try:
             return Game.objects.get(pk=pk)
@@ -44,7 +66,9 @@ class FetchGame(APIView):
         return Response(serializer.data)
 
 
-class ListPlaySession(APIView):
+class ApiPlaySession(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, format=None):
         serializer = PlaySessionSerializer(data = request.data)
 
@@ -55,7 +79,10 @@ class ListPlaySession(APIView):
 
 
 class ListUsersLastPlayed(APIView):
+    permission_classes = [isStaff]
+
     def get(self, request, format=None):
         users = User.objects.all()
-        serializer = UserSerializer(users, many = True)
+        serializer = LastGamesPlayedSerializer(users, many = True)
+
         return Response(serializer.data)
