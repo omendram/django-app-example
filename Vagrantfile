@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "bento/ubuntu-20.04"
   config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
   config.vm.network "forwarded_port", guest: 8000, host: 8080, host_ip: "127.0.0.1"
   config.vm.synced_folder ".", "/home/vagrant/mUtomik"
@@ -18,12 +18,14 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", inline: <<-SHELL
     apt-get -y upgrade python3
-    echo " ========== PYTHON INSTALLED =========="
+    echo " ========== python has been installed =========="
     apt-get -y install python3-pip
-    echo " ========== PYTHON-PIP INSTALLED =========="
+    echo " ========== pip has been installed =========="
     pip3 install -r mUtomik/requirements.txt
-    echo "dependencies installed"
-    python manage.py runserver 0.0.0.0:8000
-    echo "Server Started"
+    echo "dependencies are installed"
+    python3 mUtomik/manage.py makemigrations
+    python3 mUtomik/manage.py migrate
+    python3 mUtomik/manage.py runserver 0.0.0.0:8000 &
+    echo "server has been started"
   SHELL
 end
