@@ -8,8 +8,14 @@ from django.dispatch import receiver
 
 
 from .permissions import isStaff
-from .models import User, Game, PlaySession
-from .serializer import RegisterSerializer, UserSerializer, GameSerializer, PlaySessionSerializer, LastGamesPlayedSerializer
+from .models import User, Game, PlaySession, Avatar
+from .serializer import \
+    RegisterSerializer, \
+    UserSerializer, \
+    GameSerializer, \
+    PlaySessionSerializer, \
+    LastGamesPlayedSerializer, \
+    AvatarSerializer
 
 
 class CustomAPIView(APIView):
@@ -89,6 +95,27 @@ class ListUsersLastPlayed(APIView):
         serializer = LastGamesPlayedSerializer(users, many = True)
 
         return Response(serializer.data)
+
+
+class AvatarApi(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        try:
+            avatar_instance = Avatar.objects.get(user=request.user)
+            serializer = AvatarSerializer(avatar_instance)
+            return Response(serializer.data)
+        except:
+            return Response({"message": "No avatar found!"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def post(self, request, *args, **kwargs):
+        serializer = AvatarSerializer(data=request.data, context = {"request": request})
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @receiver(post_save, sender=PlaySession)

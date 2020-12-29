@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
+from .validators import validate_file_extension
 
 
 class Game(models.Model):
@@ -24,3 +25,14 @@ class PlaySession(models.Model):
     created_at = models.DateTimeField(auto_now=True)
 
     REQUIRED_FIELDS = ['game', 'created_by']
+
+
+class Avatar(models.Model):
+    file = models.FileField(blank=False, null=False, validators=[validate_file_extension])
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+
+    REQUIRED_FIELDS = ['user', 'file']
+
+    def __str__(self):
+        return '{} ({})'.format(self.user, self.file)

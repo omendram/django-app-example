@@ -6,7 +6,7 @@ from django.contrib.auth.hashers import make_password
 from datetime import date
 from rest_framework.fields import CurrentUserDefault
 
-from .models import User, Game, PlaySession
+from .models import User, Game, PlaySession, Avatar
 
 
 
@@ -59,4 +59,18 @@ class LastGamesPlayedSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'last_played')
 
-        
+
+class AvatarSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Avatar
+        fields = '__all__'
+    
+    def create(self, validated_data):
+        avtar, _ = Avatar.objects.update_or_create(
+            user = validated_data['user'],
+            defaults={'file': validated_data.get('file', None)}
+        )
+
+        return avtar
